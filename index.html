@@ -10,9 +10,7 @@ layout: default
         {{ post.date | date: "%B %e, %Y" }}
       </div>
 
-      <div style="margin-top:0px">
-        <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
-      </div>
+      <h1 style="margin-top:0px"><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
 
       <div class="entry">
         {{ post.excerpt }}
