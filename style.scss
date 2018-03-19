@@ -19,7 +19,9 @@ html {
 
 body {
   background: $white;
-  font: 18px/1.4 $helvetica;
+//  font: 16px/1.4 $helvetica;
+  font-family: 'Open Sans', serif;
+  font-size: 16px;
   color: $darkGray;
 }
 
@@ -32,9 +34,9 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
 //  font-family: $helveticaNeue;
-  font-family: 'Lora', 'Times New Roman', serif;
+  font-family: 'Open Sans', serif;
 //  color: $darkerGray;
-  color: #0000ff;
+  color: #FF6600;
   font-weight: bold;
 
   line-height: 1.7;
