@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Firebird vs Windows: file-system caching issue
+title: "Firebird vs Windows: file-system caching issue"
 ---
 
 This article is going to shed some light on the facts related to the issue registered as [CORE-3791](http://tracker.firebirdsql.org/browse/CORE-3791) in the project bug tracker. Let's start with some links.
