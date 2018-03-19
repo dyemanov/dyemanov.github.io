@@ -31,10 +31,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: $helveticaNeue;
-//  font-family: 'Open Sans', serif;
+//  font-family: $helveticaNeue;
+  font-family: 'Roboto', 'Oswald', $helveticaNeue;
 //  color: $gray;
-  color: #003399;
+  color: #336699;
   font-weight: bold;
 
   line-height: 1.7;
