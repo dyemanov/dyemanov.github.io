@@ -1,0 +1,26 @@
+---
+layout: post
+title: A few words about the shared memory and files
+---
+
+Even if running in the Classic (isolated process) mode, Firebird needs some data to be available to all the running server processes. There are four kinds of information that must be shared:
+
+- Lock table. It's the vital part of the lock manager and its primary goal is to synchronize access to various resources that can be read or modified simultaneously.
+- Event table. Every time a posted event is committed, the server needs to find all the subscribers and redirect the event delivery to processes handling the appropriate user connections.
+- Monitoring snapshot. It keeps the latest known state of all the running worker processes and it gets updated once some user connection attempts to access the monitoring tables in a new transaction.
+- Trace configuration. It contains the information required for the worker processes to react on the currently active tracing events and log the appropriate notifications
+
+The shared memory regions are backed by the files on disk, i.e. those files are mapped to the address space of the worker processes. The backing files can grow if necessary, causing the shared memory regions to be remapped. The backing files and shared memory regions are created when the first worker process initializes the corresponding subsystem and then used by other worker processes. Once there are no active users of those backing files, they are either removed by the last worker process (Firebird 2.5 and above) or could be left on disk to be reused later (prior to Firebird 2.5). They're also left on disk in the case of the server crash. The initial size of the shared memory regions can be user configurable, see LockMemSize and EventMemSize settings in firebird.conf.
+
+Historically, the files backing the shared memory were located in the root directory if the Firebird installation and thus they were isolated from different Firebird instances. However, this could cause serious troubles if two or more separate Classic instances would occasionally try to access the same database in the read-write mode. Without a shared lock table, they would not synchronize their activity and hence they could easily overwrite each other's changes (in the best case) or just leave the database totally corrupted and unusable (in the worst case).
+
+Also, it should be noted that the shared memory regions were global for the particular server instance. In other words, they handled the shared data for all the databases processed by this server instance. Given the fact that the whole shared memory region is protected by a single mutex, it could cause unexpectedly high mutex wait ratios (and thus degraded performance) if multiple databases were heavily loaded by user connections.
+
+Firebird 2.5 has attempted to improve this situation in two ways:
+
+- From one side, the shared memory regions (and their backing files) have been made database specific. A separate file and mutex are used for the every database being accessed. So databases are completely isolated now and don't interfere with each other even via the shared resources.
+- From another side, they have been made system-wide, i.e. they are visible and can be accessed by different server instances trying to access the same database. So any related database corruption is not possible anymore.
+
+While implementing these changes, one question was raised for discussion - where should the backing files reside now, provided their system-wide nature. Their location must be well-known to all the programs running in the system but it must be persistent and not depending on any runtime overrides. So global configuration options or environment variables don't satisfy the requirement, as any change at runtime could lead to a half of worker processes using one lock table and another half using another one. One suitable solution has been attempted in Vulcan which had the lock table residing along with the database file itself, in the same directory. But, unfortunately, this cannot work for databases mounted on read-only partitions. So another solution has been chosen - a predefined directory in the host OS that is guaranteed to exist and that allows read-write permissions. On Linux and other unixes, the original suggestion was something like /var/firebird, but the /var  directory itself is usually protected, so some kind of a privileged initial setup would be required in order to create a sub-directory, and this conflicts with "zero-install" requirements for the embedded server. So we have ended with /tmp/firebird, as the system without /tmp can be hardly found. Also, it corresponds to the temporary (even if sometimes long-living) nature of those files. On Windows, there's no predefined temporary directory and the path returned by GetTempPath() can be easily affected by TMP/TEMP environment variables. So we ended with %PROGRAMDATA%/firebird there.
+
+That said, you can still override the default location with the FIREBIRD_LOCK environment variable. But please don't say you haven't been warned. Make yourself absolutely confident what you are doing and what issues you can expect if the setting has been misused, e.g. not made the same value available for all users/programs or altered at runtime.
