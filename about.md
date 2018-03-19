@@ -1,15 +1,12 @@
 ---
 layout: page
-title: About
+title: About Me
 permalink: /about/
 ---
 
-Some information about you!
+Firebird core developer (since 2002) and R&D coordinator (somewhat later)
 
-### More Information
+### Related Links
 
-A place to include any other types of information that you'd like to include about yourself.
-
-### Contact me
-
-[email@domain.com](mailto:email@domain.com)
+Firebird Project | https://www.firebirdsql.org
+Firebird repo @ GitHub | https://github.com/FirebirdSQL/firebird
