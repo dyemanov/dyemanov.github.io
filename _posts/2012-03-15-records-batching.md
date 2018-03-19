@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Record Batching
+title: Record batching
 ---
 
 As explained priorly, the fetch response includes multiple resulting records batched together. But how many records should be batched? Sending too few records is going to increase a number of round-trips. Sending too many records will cause the client to stall waiting until it can acknowledge the delivery. And it could also be possible that the client does not need so many records and it was going to close the cursor after receiving the first one. So it turns out that some compromise is required here. The minimal practical batch size depends on the used protocol buffer size, i.e. how many records could be cached before sending and then transmitted as a single packet. The buffer size for the TCP protocol is defined by the *TcpRemoteBufferSize* setting in firebird.conf. However, it often makes sense to send more records (i.e. a few protocol buffers) without waiting for an ACK, because the CPU power could allow to process more records while waiting for the network to transmit the next batch.
